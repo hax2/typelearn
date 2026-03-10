@@ -22,7 +22,7 @@ The preview server does not proxy Groq. In the UI, you still need to point the a
 ## Deploy the Worker
 
 1. Install and authenticate Wrangler.
-2. In `worker/wrangler.jsonc`, keep `ALLOWED_ORIGIN` set to your live Pages origin. For this repo it is currently `https://www.samermakes.com`.
+2. In `worker/wrangler.jsonc`, keep `ALLOWED_ORIGIN` set to your Pages origin. For this repo it should stay `https://hax2.github.io`.
 3. Deploy the Worker from the `worker/` directory.
 4. Add the secrets on the Worker:
 
@@ -39,7 +39,7 @@ wrangler deploy
 
 Serve the `docs/` directory from the `main` branch. The frontend assets use relative paths so the project site works at:
 
-`https://www.samermakes.com/typelearn/`
+`https://hax2.github.io/typelearn/`
 
 Once the Worker is live:
 

@@ -47,13 +47,13 @@ function handleOptions(request, env) {
 
 function enforceOrigin(request, env) {
   const origin = request.headers.get("Origin") || "";
-  const allowedOrigin = getConfiguredOrigin(env);
+  const allowedOrigin = String(env.ALLOWED_ORIGIN || "").trim();
 
   if (!allowedOrigin) {
     throw httpError(500, "Missing ALLOWED_ORIGIN setting.");
   }
 
-  if (!isAllowedOrigin(origin, allowedOrigin)) {
+  if (origin !== allowedOrigin) {
     throw httpError(403, "Origin not allowed.");
   }
 }
@@ -72,11 +72,8 @@ function enforceSecret(request, env) {
 }
 
 function buildCorsHeaders(request, env) {
-  const origin = request.headers.get("Origin") || "";
-  const allowedOrigin = getConfiguredOrigin(env);
-
   return {
-    "Access-Control-Allow-Origin": isAllowedOrigin(origin, allowedOrigin) ? origin : allowedOrigin,
+    "Access-Control-Allow-Origin": String(env.ALLOWED_ORIGIN || request.headers.get("Origin") || ""),
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, X-Typelearn-Secret",
     "Access-Control-Max-Age": "86400",
@@ -100,28 +97,6 @@ function httpError(statusCode, message) {
   error.statusCode = statusCode;
   error.expose = true;
   return error;
-}
-
-function getConfiguredOrigin(env) {
-  return String(env.ALLOWED_ORIGIN || "").trim();
-}
-
-function isAllowedOrigin(origin, allowedOrigin) {
-  if (!origin || !allowedOrigin) {
-    return false;
-  }
-
-  if (origin === allowedOrigin) {
-    return true;
-  }
-
-  try {
-    const requestOrigin = new URL(origin);
-    const configuredOrigin = new URL(allowedOrigin);
-    return requestOrigin.host === configuredOrigin.host;
-  } catch {
-    return false;
-  }
 }
 
 async function readJsonBody(request) {
