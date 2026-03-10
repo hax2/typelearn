@@ -10,6 +10,7 @@ You write mostly in Spanish. If you get stuck, drop in the English word or phras
 - adds those terms to a flashcard deck
 
 The editor also has a mode switch (`Mode: Spanish` / `Mode: Polish`) so you can practice either language.
+It also includes optional hardcoded writing prompts you can rotate and insert into the draft.
 
 ## Local run
 

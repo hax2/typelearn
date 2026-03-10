@@ -221,6 +221,42 @@ body::before {
   flex-wrap: wrap;
 }
 
+.prompt-card {
+  margin-top: 16px;
+  border: 1px solid rgba(95, 73, 52, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 252, 247, 0.76);
+  padding: 14px;
+}
+
+.prompt-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.prompt-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.prompt-label {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.prompt-text {
+  margin: 10px 0 0;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
 .panel-header h2 {
   margin-top: 4px;
   font-size: 2rem;
@@ -264,7 +300,7 @@ body::before {
 #editor {
   width: 100%;
   min-height: 520px;
-  margin-top: 20px;
+  margin-top: 14px;
   resize: vertical;
   border: 1px solid rgba(95, 73, 52, 0.14);
   border-radius: 24px;

@@ -12,6 +12,15 @@ const TARGET_LANGUAGES = {
     cardHint: "Tap to reveal the Spanish answer.",
     cardLabel: "Spanish",
     deckEmpty: "Your missing English words will show up here as study cards after each save.",
+    promptLabel: "Optional prompt (Spanish)",
+    prompts: [
+      "Describe your perfect Sunday from morning to night.",
+      "Write about a mistake you made and what you learned from it.",
+      "Explain your favorite meal and how to cook it.",
+      "Tell a short story about missing a bus or train.",
+      "Describe someone you admire and why.",
+      "Write about a place in your city that tourists should visit.",
+    ],
   },
   polish: {
     name: "Polish",
@@ -24,6 +33,15 @@ const TARGET_LANGUAGES = {
     cardHint: "Tap to reveal the Polish answer.",
     cardLabel: "Polish",
     deckEmpty: "Missing English words will appear here as Polish study cards after each save.",
+    promptLabel: "Optional prompt (Polish)",
+    prompts: [
+      "Opisz idealny weekend od rana do wieczora.",
+      "Napisz o trudnej decyzji, ktora podjales w tym roku.",
+      "Opowiedz o swoim ulubionym miejscu w miescie i dlaczego je lubisz.",
+      "Wyjasnij, jak przygotowac proste sniadanie krok po kroku.",
+      "Napisz o osobie, ktora cie inspiruje.",
+      "Opisz krotka sytuacje, gdy musiales komus pomoc.",
+    ],
   },
 };
 
@@ -34,6 +52,7 @@ const DEFAULT_STATE = {
   lastSummary: "Press Ctrl+S to fix grammar and translate English terms.",
   lastNewCards: 0,
   practiceMode: false,
+  currentPromptIndex: 0,
 };
 
 const DEFAULT_SETTINGS = {
@@ -64,6 +83,10 @@ const languageToggle = document.querySelector("#languageToggle");
 const eyebrow = document.querySelector("#eyebrow");
 const heroTitle = document.querySelector("#heroTitle");
 const subtitle = document.querySelector("#subtitle");
+const promptLabel = document.querySelector("#promptLabel");
+const promptText = document.querySelector("#promptText");
+const nextPromptButton = document.querySelector("#nextPromptButton");
+const insertPromptButton = document.querySelector("#insertPromptButton");
 
 bootstrap();
 
@@ -71,6 +94,8 @@ function bootstrap() {
   editor.value = state.note;
   groqApiKeyInput.value = state.settings.groqApiKey;
   syncLanguageMode();
+  ensurePromptIndexValid();
+  syncPrompt();
   renderDeck();
   renderMeta();
   syncPracticeToggle();
@@ -98,8 +123,12 @@ saveKeyButton.addEventListener("click", () => {
 languageToggle.addEventListener("click", () => {
   const current = currentLanguageConfig();
   state.settings.targetLanguage = current.name === "Spanish" ? "polish" : "spanish";
+  state.currentPromptIndex = 0;
   persistSettings();
+  persistState();
   syncLanguageMode();
+  ensurePromptIndexValid();
+  syncPrompt();
   renderDeck();
 });
 
@@ -108,6 +137,41 @@ practiceToggle.addEventListener("click", () => {
   persistState();
   syncPracticeToggle();
   renderDeck();
+});
+
+nextPromptButton.addEventListener("click", () => {
+  const prompts = currentLanguageConfig().prompts || [];
+
+  if (!prompts.length) {
+    return;
+  }
+
+  state.currentPromptIndex = nextPromptIndex(prompts.length, state.currentPromptIndex);
+  persistState();
+  syncPrompt();
+});
+
+insertPromptButton.addEventListener("click", () => {
+  const prompt = currentPromptText();
+
+  if (!prompt) {
+    return;
+  }
+
+  const currentValue = editor.value;
+  const selectionStart = editor.selectionStart ?? currentValue.length;
+  const selectionEnd = editor.selectionEnd ?? currentValue.length;
+  const prefix = currentValue.slice(0, selectionStart);
+  const suffix = currentValue.slice(selectionEnd);
+  const separatorBefore = prefix && !prefix.endsWith("\n") ? "\n\n" : "";
+  const separatorAfter = suffix && !suffix.startsWith("\n") ? "\n\n" : "";
+  const inserted = `${separatorBefore}${prompt}${separatorAfter}`;
+  editor.value = `${prefix}${inserted}${suffix}`;
+  editor.focus();
+  const caret = prefix.length + inserted.length;
+  editor.setSelectionRange(caret, caret);
+  state.note = editor.value;
+  persistState();
 });
 
 window.addEventListener("keydown", (event) => {
@@ -246,6 +310,7 @@ function persistState() {
       lastSummary: state.lastSummary,
       lastNewCards: state.lastNewCards,
       practiceMode: state.practiceMode,
+      currentPromptIndex: state.currentPromptIndex,
     }),
   );
 }
@@ -260,6 +325,7 @@ function loadState() {
     lastSummary: typeof parsed.lastSummary === "string" ? parsed.lastSummary : DEFAULT_STATE.lastSummary,
     lastNewCards: Number.isFinite(parsed.lastNewCards) ? parsed.lastNewCards : DEFAULT_STATE.lastNewCards,
     practiceMode: Boolean(parsed.practiceMode),
+    currentPromptIndex: Number.isFinite(parsed.currentPromptIndex) ? parsed.currentPromptIndex : 0,
   };
 }
 
@@ -382,4 +448,52 @@ function syncLanguageMode() {
   subtitle.textContent = config.subtitle;
   editor.placeholder = config.placeholder;
   deckEmpty.textContent = config.deckEmpty;
+}
+
+function syncPrompt() {
+  const config = currentLanguageConfig();
+  const prompt = currentPromptText();
+  promptLabel.textContent = config.promptLabel;
+  promptText.textContent = prompt || "No prompts available for this mode yet.";
+  const isDisabled = !prompt;
+  nextPromptButton.disabled = isDisabled;
+  insertPromptButton.disabled = isDisabled;
+}
+
+function currentPromptText() {
+  const prompts = currentLanguageConfig().prompts || [];
+
+  if (!prompts.length) {
+    return "";
+  }
+
+  ensurePromptIndexValid();
+  return prompts[state.currentPromptIndex];
+}
+
+function ensurePromptIndexValid() {
+  const prompts = currentLanguageConfig().prompts || [];
+
+  if (!prompts.length) {
+    state.currentPromptIndex = 0;
+    return;
+  }
+
+  if (!Number.isInteger(state.currentPromptIndex) || state.currentPromptIndex < 0 || state.currentPromptIndex >= prompts.length) {
+    state.currentPromptIndex = 0;
+  }
+}
+
+function nextPromptIndex(total, current) {
+  if (total <= 1) {
+    return 0;
+  }
+
+  let index = Math.floor(Math.random() * total);
+
+  if (index === current) {
+    index = (index + 1) % total;
+  }
+
+  return index;
 }
