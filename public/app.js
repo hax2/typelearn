@@ -1,5 +1,31 @@
 const STORAGE_KEY = "typelearn.state.v4";
 const SETTINGS_KEY = "typelearn.settings.v1";
+const TARGET_LANGUAGES = {
+  spanish: {
+    name: "Spanish",
+    modeLabel: "Mode: Spanish",
+    eyebrow: "Spanish-first writing lab",
+    heroTitle: "Write in Spanish. Borrow from English only when you have to.",
+    subtitle:
+      "Press Ctrl+S or Cmd+S to clean the draft, translate English gaps into Spanish, and turn those missing words into flashcards.",
+    placeholder: "Escribe aqui. Si no sabes una palabra, ponla en English y guarda.",
+    cardHint: "Tap to reveal the Spanish answer.",
+    cardLabel: "Spanish",
+    deckEmpty: "Your missing English words will show up here as study cards after each save.",
+  },
+  polish: {
+    name: "Polish",
+    modeLabel: "Mode: Polish",
+    eyebrow: "Polish-first writing lab",
+    heroTitle: "Write in Polish. Borrow from English only when you have to.",
+    subtitle:
+      "Press Ctrl+S or Cmd+S to clean the draft, translate English gaps into Polish, and turn those missing words into flashcards.",
+    placeholder: "Pisz po polsku. Jesli nie znasz slowa, wpisz je in English i zapisz.",
+    cardHint: "Tap to reveal the Polish answer.",
+    cardLabel: "Polish",
+    deckEmpty: "Missing English words will appear here as Polish study cards after each save.",
+  },
+};
 
 const DEFAULT_STATE = {
   note: "",
@@ -12,6 +38,7 @@ const DEFAULT_STATE = {
 
 const DEFAULT_SETTINGS = {
   groqApiKey: "",
+  targetLanguage: "spanish",
 };
 
 const state = {
@@ -33,12 +60,17 @@ const practiceToggle = document.querySelector("#practiceToggle");
 const cardTemplate = document.querySelector("#cardTemplate");
 const groqApiKeyInput = document.querySelector("#groqApiKey");
 const saveKeyButton = document.querySelector("#saveKeyButton");
+const languageToggle = document.querySelector("#languageToggle");
+const eyebrow = document.querySelector("#eyebrow");
+const heroTitle = document.querySelector("#heroTitle");
+const subtitle = document.querySelector("#subtitle");
 
 bootstrap();
 
 function bootstrap() {
   editor.value = state.note;
   groqApiKeyInput.value = state.settings.groqApiKey;
+  syncLanguageMode();
   renderDeck();
   renderMeta();
   syncPracticeToggle();
@@ -61,6 +93,14 @@ saveButton.addEventListener("click", () => {
 
 saveKeyButton.addEventListener("click", () => {
   persistSettingsFromInputs();
+});
+
+languageToggle.addEventListener("click", () => {
+  const current = currentLanguageConfig();
+  state.settings.targetLanguage = current.name === "Spanish" ? "polish" : "spanish";
+  persistSettings();
+  syncLanguageMode();
+  renderDeck();
 });
 
 practiceToggle.addEventListener("click", () => {
@@ -100,7 +140,7 @@ async function saveDraft() {
     const response = await fetch("/api/rewrite", {
       method: "POST",
       headers,
-      body: JSON.stringify({ text: editor.value }),
+      body: JSON.stringify({ text: editor.value, targetLanguage: state.settings.targetLanguage }),
     });
 
     const payload = await readResponsePayload(response);
@@ -137,9 +177,10 @@ async function saveDraft() {
 function persistSettingsFromInputs() {
   state.settings = {
     groqApiKey: String(groqApiKeyInput.value || "").trim(),
+    targetLanguage: normalizeTargetLanguage(state.settings.targetLanguage),
   };
 
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+  persistSettings();
 
   if (state.settings.groqApiKey) {
     setStatus("API key saved in browser storage.", false);
@@ -159,6 +200,7 @@ function renderDeck() {
   deckList.innerHTML = "";
 
   if (!state.deck.length) {
+    deckEmpty.textContent = currentLanguageConfig().deckEmpty;
     deckEmpty.hidden = false;
     return;
   }
@@ -171,6 +213,8 @@ function renderDeck() {
     const button = fragment.querySelector(".flip-button");
 
     fragment.querySelector('[data-field="sourceTerm"]').textContent = card.sourceTerm;
+    fragment.querySelector('[data-field="cardHint"]').textContent = currentLanguageConfig().cardHint;
+    fragment.querySelector('[data-field="targetLabel"]').textContent = currentLanguageConfig().cardLabel;
     fragment.querySelector('[data-field="spanishTerm"]').textContent = card.spanishTerm;
     fragment.querySelector('[data-field="exampleSentence"]').textContent = card.exampleSentence;
     fragment.querySelector('[data-field="notes"]').textContent = card.notes;
@@ -224,7 +268,12 @@ function loadSettings() {
 
   return {
     groqApiKey: typeof parsed.groqApiKey === "string" ? parsed.groqApiKey : DEFAULT_SETTINGS.groqApiKey,
+    targetLanguage: normalizeTargetLanguage(parsed.targetLanguage),
   };
+}
+
+function persistSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
 }
 
 function loadJson(storageKey, fallback) {
@@ -314,4 +363,23 @@ function updateSummary(message) {
 function formatSavedTime(timestamp) {
   const date = new Date(timestamp);
   return `Saved ${date.toLocaleString()}`;
+}
+
+function normalizeTargetLanguage(value) {
+  return value === "polish" ? "polish" : "spanish";
+}
+
+function currentLanguageConfig() {
+  return TARGET_LANGUAGES[normalizeTargetLanguage(state.settings.targetLanguage)];
+}
+
+function syncLanguageMode() {
+  state.settings.targetLanguage = normalizeTargetLanguage(state.settings.targetLanguage);
+  const config = currentLanguageConfig();
+  languageToggle.textContent = config.modeLabel;
+  eyebrow.textContent = config.eyebrow;
+  heroTitle.textContent = config.heroTitle;
+  subtitle.textContent = config.subtitle;
+  editor.placeholder = config.placeholder;
+  deckEmpty.textContent = config.deckEmpty;
 }

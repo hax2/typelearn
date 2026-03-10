@@ -214,6 +214,13 @@ body::before {
   gap: 16px;
 }
 
+.button-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .panel-header h2 {
   margin-top: 4px;
   font-size: 2rem;

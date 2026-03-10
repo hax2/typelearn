@@ -9,6 +9,8 @@ You write mostly in Spanish. If you get stuck, drop in the English word or phras
 - extracts the English fallback terms you used
 - adds those terms to a flashcard deck
 
+The editor also has a mode switch (`Mode: Spanish` / `Mode: Polish`) so you can practice either language.
+
 ## Local run
 
 1. Create a `.env` file from `.env.example`.

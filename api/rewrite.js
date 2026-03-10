@@ -7,6 +7,7 @@ export default async function handler(request, response) {
   try {
     const body = await readJsonBody(request);
     const text = typeof body.text === "string" ? body.text.trim() : "";
+    const targetLanguage = normalizeTargetLanguage(body.targetLanguage);
 
     if (!text) {
       return response.status(400).json({ error: "Text is required." });
@@ -18,7 +19,7 @@ export default async function handler(request, response) {
       return response.status(500).json({ error: "Missing API key. Set GROQ_API_KEY or send X-Groq-Api-Key." });
     }
 
-    const rewrite = await rewriteSpanishDraft(text, apiKey);
+    const rewrite = await rewriteDraft(text, apiKey, targetLanguage);
     return response.status(200).json(rewrite);
   } catch (error) {
     const statusCode = error.statusCode || 500;
@@ -67,8 +68,8 @@ function httpError(statusCode, message) {
   return error;
 }
 
-async function rewriteSpanishDraft(text, apiKey) {
-  const strictAttempt = await requestGroqChat(apiKey, buildStrictRewritePayload(text));
+async function rewriteDraft(text, apiKey, targetLanguage) {
+  const strictAttempt = await requestGroqChat(apiKey, buildStrictRewritePayload(text, targetLanguage));
 
   if (strictAttempt.ok) {
     const parsed = normalizeRewritePayload(parseGroqJsonContent(strictAttempt.result), text);
@@ -82,7 +83,7 @@ async function rewriteSpanishDraft(text, apiKey) {
     );
   }
 
-  const fallbackAttempt = await requestGroqChat(apiKey, buildFallbackRewritePayload(text));
+  const fallbackAttempt = await requestGroqChat(apiKey, buildFallbackRewritePayload(text, targetLanguage));
 
   if (!fallbackAttempt.ok) {
     throw httpError(
@@ -95,15 +96,15 @@ async function rewriteSpanishDraft(text, apiKey) {
   return finalizeRewritePayload(parsed);
 }
 
-function buildStrictRewritePayload(text) {
+function buildStrictRewritePayload(text, targetLanguage) {
   return {
     model: "openai/gpt-oss-20b",
     temperature: 0.2,
-    messages: buildRewriteMessages(text),
+    messages: buildRewriteMessages(text, targetLanguage),
     response_format: {
       type: "json_schema",
       json_schema: {
-        name: "spanish_learning_revision",
+        name: "language_learning_revision",
         strict: true,
         schema: {
           type: "object",
@@ -133,12 +134,12 @@ function buildStrictRewritePayload(text) {
   };
 }
 
-function buildFallbackRewritePayload(text) {
+function buildFallbackRewritePayload(text, targetLanguage) {
   return {
     model: "openai/gpt-oss-20b",
     temperature: 0,
     messages: [
-      ...buildRewriteMessages(text),
+      ...buildRewriteMessages(text, targetLanguage),
       {
         role: "system",
         content:
@@ -151,12 +152,14 @@ function buildFallbackRewritePayload(text) {
   };
 }
 
-function buildRewriteMessages(text) {
+function buildRewriteMessages(text, targetLanguage) {
+  const languageLabel = targetLanguage === "polish" ? "Polish" : "Spanish";
+
   return [
     {
       role: "system",
       content:
-        "You help Spanish learners write naturally. The user writes mostly in Spanish and sometimes leaves English words or short English phrases in the draft when they do not know the Spanish term. Rewrite the full draft in idiomatic Spanish while preserving meaning, tone, point of view, tense, formatting, and paragraph breaks. Only create flashcards for English fallback terms that appear in the original draft. Do not create cards for general grammar fixes. Keep cards concise and deduplicated.",
+        `You help ${languageLabel} learners write naturally. The user writes mostly in ${languageLabel} and sometimes leaves English words or short English phrases in the draft when they do not know the ${languageLabel} term. Rewrite the full draft in idiomatic ${languageLabel} while preserving meaning, tone, point of view, tense, formatting, and paragraph breaks. Only create flashcards for English fallback terms that appear in the original draft. Do not create cards for general grammar fixes. Keep cards concise and deduplicated. Use the output key named "spanishTerm" for the translated term even when the target language is not Spanish.`,
     },
     {
       role: "user",
@@ -246,6 +249,10 @@ function finalizeRewritePayload(payload) {
 
 function isJsonValidationFailure(details) {
   return typeof details === "string" && details.includes("json_validate_failed");
+}
+
+function normalizeTargetLanguage(value) {
+  return value === "polish" ? "polish" : "spanish";
 }
 
 async function safeReadText(response) {

@@ -11,9 +11,9 @@
     <div class="shell">
       <header class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Spanish-first writing lab</p>
-          <h1>Write in Spanish. Borrow from English only when you have to.</h1>
-          <p class="subtitle">
+          <p class="eyebrow" id="eyebrow">Spanish-first writing lab</p>
+          <h1 id="heroTitle">Write in Spanish. Borrow from English only when you have to.</h1>
+          <p class="subtitle" id="subtitle">
             Press <span class="keycap">Ctrl+S</span> or <span class="keycap">Cmd+S</span> to clean the draft,
             translate English gaps into Spanish, and turn those missing words into flashcards.
           </p>
@@ -56,7 +56,10 @@
               <p class="panel-kicker">Editor</p>
               <h2>Draft</h2>
             </div>
-            <button id="saveButton" class="accent-button" type="button">Fix + Save</button>
+            <div class="button-row">
+              <button id="languageToggle" class="ghost-button" type="button">Mode: Spanish</button>
+              <button id="saveButton" class="accent-button" type="button">Fix + Save</button>
+            </div>
           </div>
           <textarea
             id="editor"
@@ -93,10 +96,10 @@
           <span class="card-face card-front">
             <span class="card-label">You wrote</span>
             <strong class="card-main" data-field="sourceTerm"></strong>
-            <span class="card-hint">Tap to reveal the Spanish answer.</span>
+            <span class="card-hint" data-field="cardHint">Tap to reveal the answer.</span>
           </span>
           <span class="card-face card-back">
-            <span class="card-label">Spanish</span>
+            <span class="card-label" data-field="targetLabel">Spanish</span>
             <strong class="card-main" data-field="spanishTerm"></strong>
             <span class="card-example" data-field="exampleSentence"></span>
             <span class="card-notes" data-field="notes"></span>
