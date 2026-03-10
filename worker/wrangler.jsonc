@@ -1,8 +1,0 @@
-{
-  "name": "typelearn-api",
-  "main": "index.js",
-  "compatibility_date": "2026-03-10",
-  "vars": {
-    "ALLOWED_ORIGIN": "https://hax2.github.io"
-  }
-}
