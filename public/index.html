@@ -22,6 +22,20 @@
           <p class="status-label">Status</p>
           <p class="status-value" id="saveStatus">Loading your workspace...</p>
           <p class="status-meta" id="lastSaved">No saves yet</p>
+          <div class="status-controls">
+            <label class="status-field" for="groqApiKey">Groq API key (optional)</label>
+            <input
+              id="groqApiKey"
+              class="status-input"
+              type="password"
+              autocomplete="off"
+              placeholder="gsk_..."
+            />
+            <button id="saveKeyButton" class="ghost-button mini-button" type="button">Save key</button>
+            <p class="status-hint">
+              If empty, the app uses the server key. If set, this key is stored only in your browser.
+            </p>
+          </div>
           <div class="stats-row">
             <div>
               <span class="stat-label">Deck</span>

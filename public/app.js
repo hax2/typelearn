@@ -1,7 +1,23 @@
-const state = {
-  practiceMode: false,
-  saving: false,
+const STORAGE_KEY = "typelearn.state.v4";
+const SETTINGS_KEY = "typelearn.settings.v1";
+
+const DEFAULT_STATE = {
+  note: "",
   deck: [],
+  lastSavedAt: null,
+  lastSummary: "Press Ctrl+S to fix grammar and translate English terms.",
+  lastNewCards: 0,
+  practiceMode: false,
+};
+
+const DEFAULT_SETTINGS = {
+  groqApiKey: "",
+};
+
+const state = {
+  ...loadState(),
+  settings: loadSettings(),
+  saving: false,
 };
 
 const editor = document.querySelector("#editor");
@@ -15,42 +31,42 @@ const deckList = document.querySelector("#deckList");
 const deckEmpty = document.querySelector("#deckEmpty");
 const practiceToggle = document.querySelector("#practiceToggle");
 const cardTemplate = document.querySelector("#cardTemplate");
+const groqApiKeyInput = document.querySelector("#groqApiKey");
+const saveKeyButton = document.querySelector("#saveKeyButton");
 
 bootstrap();
 
-async function bootstrap() {
-  try {
-    setStatus("Loading your workspace...", false);
-    const response = await fetch("/api/state");
-    const payload = await response.json();
+function bootstrap() {
+  editor.value = state.note;
+  groqApiKeyInput.value = state.settings.groqApiKey;
+  renderDeck();
+  renderMeta();
+  syncPracticeToggle();
 
-    if (!response.ok) {
-      throw new Error(payload.error || "Failed to load state.");
-    }
-
-    editor.value = payload.note || "";
-    state.deck = Array.isArray(payload.deck) ? payload.deck : [];
-    renderDeck();
-    updateSummary(payload.lastSummary || "Ready.");
-    lastSaved.textContent = payload.lastSavedAt ? formatSavedTime(payload.lastSavedAt) : "No saves yet";
-    cardCount.textContent = `${payload.stats?.totalCards || 0} cards`;
-    newCardsCount.textContent = "0 new";
-    setStatus("Ready to revise.", false);
-  } catch (error) {
-    console.error(error);
-    setStatus(error.message || "Failed to load workspace.", true);
-    updateSummary("The app could not load your saved note.");
+  if (state.settings.groqApiKey) {
+    setStatus("Ready. Using browser-stored API key.", false);
+  } else {
+    setStatus("Ready. Using server API key if configured.", false);
   }
 }
+
+editor.addEventListener("input", () => {
+  state.note = editor.value;
+  persistState();
+});
 
 saveButton.addEventListener("click", () => {
   void saveDraft();
 });
 
+saveKeyButton.addEventListener("click", () => {
+  persistSettingsFromInputs();
+});
+
 practiceToggle.addEventListener("click", () => {
   state.practiceMode = !state.practiceMode;
-  practiceToggle.setAttribute("aria-pressed", String(state.practiceMode));
-  practiceToggle.textContent = state.practiceMode ? "Show answers by tap" : "Practice mode";
+  persistState();
+  syncPracticeToggle();
   renderDeck();
 });
 
@@ -66,42 +82,77 @@ async function saveDraft() {
     return;
   }
 
+  persistSettingsFromInputs();
   state.saving = true;
   saveButton.disabled = true;
   saveButton.textContent = "Saving...";
   setStatus("Fixing grammar and translating gaps...", false);
 
   try {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    if (state.settings.groqApiKey) {
+      headers["X-Groq-Api-Key"] = state.settings.groqApiKey;
+    }
+
     const response = await fetch("/api/rewrite", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({ text: editor.value }),
     });
-    const payload = await response.json();
+
+    const payload = await readResponsePayload(response);
 
     if (!response.ok) {
       throw new Error(payload.error || "Save failed.");
     }
 
-    editor.value = payload.note || "";
-    state.deck = Array.isArray(payload.deck) ? payload.deck : [];
+    const nextCards = Array.isArray(payload.cards) ? payload.cards.map(normalizeCard) : [];
+    const merged = mergeDeck(state.deck, nextCards);
+
+    state.note = String(payload.correctedText || editor.value);
+    state.deck = merged.deck;
+    state.lastSavedAt = new Date().toISOString();
+    state.lastSummary = String(payload.changeSummary || "Draft updated.");
+    state.lastNewCards = merged.addedCount;
+
+    editor.value = state.note;
+    persistState();
     renderDeck();
-    updateSummary(payload.lastSummary || "Draft updated.");
+    renderMeta();
     setStatus("Draft corrected and saved.", false);
-    lastSaved.textContent = payload.lastSavedAt ? formatSavedTime(payload.lastSavedAt) : "Saved";
-    cardCount.textContent = `${payload.stats?.totalCards || 0} cards`;
-    newCardsCount.textContent = `${payload.newCards || 0} new`;
   } catch (error) {
     console.error(error);
     setStatus(error.message || "Save failed.", true);
-    updateSummary("The draft was not updated. Check the server and your Groq key.");
+    updateSummary("The draft stays local. Verify your API key or server configuration.");
   } finally {
     state.saving = false;
     saveButton.disabled = false;
     saveButton.textContent = "Fix + Save";
   }
+}
+
+function persistSettingsFromInputs() {
+  state.settings = {
+    groqApiKey: String(groqApiKeyInput.value || "").trim(),
+  };
+
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+
+  if (state.settings.groqApiKey) {
+    setStatus("API key saved in browser storage.", false);
+  } else {
+    setStatus("Key cleared. App will use server key if available.", false);
+  }
+}
+
+function renderMeta() {
+  updateSummary(state.lastSummary);
+  lastSaved.textContent = state.lastSavedAt ? formatSavedTime(state.lastSavedAt) : "No saves yet";
+  cardCount.textContent = `${state.deck.length} cards`;
+  newCardsCount.textContent = `${state.lastNewCards} new`;
 }
 
 function renderDeck() {
@@ -134,6 +185,121 @@ function renderDeck() {
 
     deckList.appendChild(fragment);
   }
+}
+
+function syncPracticeToggle() {
+  practiceToggle.setAttribute("aria-pressed", String(state.practiceMode));
+  practiceToggle.textContent = state.practiceMode ? "Show answers by tap" : "Practice mode";
+}
+
+function persistState() {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      note: state.note,
+      deck: state.deck,
+      lastSavedAt: state.lastSavedAt,
+      lastSummary: state.lastSummary,
+      lastNewCards: state.lastNewCards,
+      practiceMode: state.practiceMode,
+    }),
+  );
+}
+
+function loadState() {
+  const parsed = loadJson(STORAGE_KEY, DEFAULT_STATE);
+
+  return {
+    note: typeof parsed.note === "string" ? parsed.note : DEFAULT_STATE.note,
+    deck: Array.isArray(parsed.deck) ? parsed.deck.map(normalizeCard) : [],
+    lastSavedAt: typeof parsed.lastSavedAt === "string" ? parsed.lastSavedAt : DEFAULT_STATE.lastSavedAt,
+    lastSummary: typeof parsed.lastSummary === "string" ? parsed.lastSummary : DEFAULT_STATE.lastSummary,
+    lastNewCards: Number.isFinite(parsed.lastNewCards) ? parsed.lastNewCards : DEFAULT_STATE.lastNewCards,
+    practiceMode: Boolean(parsed.practiceMode),
+  };
+}
+
+function loadSettings() {
+  const parsed = loadJson(SETTINGS_KEY, DEFAULT_SETTINGS);
+
+  return {
+    groqApiKey: typeof parsed.groqApiKey === "string" ? parsed.groqApiKey : DEFAULT_SETTINGS.groqApiKey,
+  };
+}
+
+function loadJson(storageKey, fallback) {
+  try {
+    const raw = localStorage.getItem(storageKey);
+
+    if (!raw) {
+      return fallback;
+    }
+
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+function normalizeCard(rawCard) {
+  const sourceTerm = String(rawCard?.sourceTerm || "").trim();
+  const spanishTerm = String(rawCard?.spanishTerm || "").trim();
+  const exampleSentence = String(rawCard?.exampleSentence || "").trim();
+  const notes = String(rawCard?.notes || "").trim();
+  const createdAt = String(rawCard?.createdAt || new Date().toISOString());
+  const id = String(rawCard?.id || `${sourceTerm.toLowerCase()}::${spanishTerm.toLowerCase()}`);
+
+  return {
+    id,
+    sourceTerm,
+    spanishTerm,
+    exampleSentence,
+    notes,
+    createdAt,
+  };
+}
+
+function mergeDeck(existingDeck, incomingDeck) {
+  const cardsById = new Map(existingDeck.map((card) => [card.id, normalizeCard(card)]));
+  let addedCount = 0;
+
+  for (const rawCard of incomingDeck) {
+    const card = normalizeCard(rawCard);
+
+    if (!card.sourceTerm || !card.spanishTerm) {
+      continue;
+    }
+
+    if (!cardsById.has(card.id)) {
+      cardsById.set(card.id, card);
+      addedCount += 1;
+      continue;
+    }
+
+    const current = cardsById.get(card.id);
+    cardsById.set(card.id, {
+      ...current,
+      exampleSentence: current.exampleSentence || card.exampleSentence,
+      notes: current.notes || card.notes,
+    });
+  }
+
+  return {
+    deck: Array.from(cardsById.values()).sort((left, right) => right.createdAt.localeCompare(left.createdAt)),
+    addedCount,
+  };
+}
+
+async function readResponsePayload(response) {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+
+  return {
+    error: await response.text(),
+  };
 }
 
 function setStatus(message, isError) {

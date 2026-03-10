@@ -9,9 +9,9 @@ You write mostly in Spanish. If you get stuck, drop in the English word or phras
 - extracts the English fallback terms you used
 - adds those terms to a flashcard deck
 
-## Run it
+## Local run
 
-1. Create a `.env` file from `.env.example` and set `GROQ_API_KEY`.
+1. Create a `.env` file from `.env.example`.
 2. Start the server:
 
 ```bash
@@ -20,4 +20,22 @@ npm start
 
 3. Open `http://localhost:3000`.
 
-The app stores your latest note and flashcard deck in `data/app-state.json`.
+You can either:
+
+- set `GROQ_API_KEY` in `.env` and leave the UI key field empty
+- paste your key into the UI key field (stored in your browser only)
+
+The note and flashcards are stored in browser `localStorage`.
+
+## Deploy to Vercel
+
+1. Push this repo to GitHub.
+2. In Vercel, import `hax2/typelearn`.
+3. Add environment variable `GROQ_API_KEY` in Vercel project settings (optional if you plan to paste key in UI).
+4. Deploy.
+
+After deploy:
+
+- open your Vercel URL
+- if no server key is configured, paste your Groq key in `Groq API key` and click `Save key`
+- write text and press `Ctrl+S`

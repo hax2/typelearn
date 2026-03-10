@@ -1,176 +1,45 @@
-import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+export default async function handler(request, response) {
+  if (request.method !== "POST") {
+    response.setHeader("Allow", "POST");
+    return response.status(405).json({ error: "Method not allowed." });
+  }
 
-import { ensureStateFile, readState } from "./storage.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const ROOT_DIR = path.resolve(__dirname, "..");
-const PUBLIC_DIR = path.join(ROOT_DIR, "public");
-const STATE_FILE = path.join(ROOT_DIR, "data", "app-state.json");
-
-await loadEnvFile(path.join(ROOT_DIR, ".env"));
-await ensureStateFile(STATE_FILE);
-const PORT = Number(process.env.PORT || 3000);
-const HOST = process.env.HOST || "127.0.0.1";
-
-const server = createServer(async (request, response) => {
   try {
-    const url = new URL(request.url || "/", `http://${request.headers.host || "localhost"}`);
+    const body = await readJsonBody(request);
+    const text = typeof body.text === "string" ? body.text.trim() : "";
 
-    if (request.method === "GET" && url.pathname === "/api/state") {
-      const state = await readState(STATE_FILE);
-      return sendJson(response, 200, decorateState(state));
+    if (!text) {
+      return response.status(400).json({ error: "Text is required." });
     }
 
-    if (request.method === "POST" && url.pathname === "/api/rewrite") {
-      const body = await readJsonBody(request);
-      const text = typeof body.text === "string" ? body.text.trim() : "";
+    const apiKey = String(request.headers["x-groq-api-key"] || "").trim() || process.env.GROQ_API_KEY;
 
-      if (!text) {
-        return sendJson(response, 400, { error: "Text is required." });
-      }
-
-      const apiKey = String(request.headers["x-groq-api-key"] || "").trim() || process.env.GROQ_API_KEY;
-
-      if (!apiKey) {
-        return sendJson(response, 500, {
-          error: "Missing API key. Set GROQ_API_KEY or send X-Groq-Api-Key.",
-        });
-      }
-
-      const rewrite = await rewriteSpanishDraft(text, apiKey);
-      return sendJson(response, 200, {
-        correctedText: rewrite.correctedText,
-        changeSummary: rewrite.changeSummary,
-        cards: rewrite.cards,
-      });
+    if (!apiKey) {
+      return response.status(500).json({ error: "Missing API key. Set GROQ_API_KEY or send X-Groq-Api-Key." });
     }
 
-    if (request.method === "GET") {
-      return serveStaticAsset(url.pathname, response);
-    }
-
-    return sendJson(response, 404, { error: "Not found." });
+    const rewrite = await rewriteSpanishDraft(text, apiKey);
+    return response.status(200).json(rewrite);
   } catch (error) {
     const statusCode = error.statusCode || 500;
     const message = error.expose ? error.message : "Internal server error.";
     console.error(error);
-    return sendJson(response, statusCode, { error: message });
-  }
-});
-
-server.listen(PORT, HOST, () => {
-  console.log(`TypeLearn running at http://${HOST}:${PORT}`);
-});
-
-async function loadEnvFile(filePath) {
-  try {
-    const contents = await readFile(filePath, "utf8");
-
-    for (const line of contents.split(/\r?\n/)) {
-      const trimmed = line.trim();
-
-      if (!trimmed || trimmed.startsWith("#")) {
-        continue;
-      }
-
-      const separatorIndex = trimmed.indexOf("=");
-
-      if (separatorIndex === -1) {
-        continue;
-      }
-
-      const key = trimmed.slice(0, separatorIndex).trim();
-      const value = trimmed.slice(separatorIndex + 1).trim().replace(/^["']|["']$/g, "");
-
-      if (key && !process.env[key]) {
-        process.env[key] = value;
-      }
-    }
-  } catch (error) {
-    if (error.code !== "ENOENT") {
-      console.error("Failed to load .env:", error);
-    }
+    return response.status(statusCode).json({ error: message });
   }
 }
 
-async function serveStaticAsset(requestPath, response) {
-  const normalizedPath = requestPath === "/" ? "/index.html" : requestPath;
-  const filePath = path.normalize(path.join(PUBLIC_DIR, normalizedPath));
-
-  if (!filePath.startsWith(PUBLIC_DIR)) {
-    return sendJson(response, 403, { error: "Forbidden." });
+async function readJsonBody(request) {
+  if (request.body && typeof request.body === "object") {
+    return request.body;
   }
 
-  try {
-    const contents = await readFile(filePath);
-    response.writeHead(200, {
-      "Content-Type": contentTypeFor(filePath),
-      "Cache-Control": "no-store",
-    });
-    response.end(contents);
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      return sendJson(response, 404, { error: "Not found." });
-    }
-
-    throw error;
-  }
-}
-
-function contentTypeFor(filePath) {
-  if (filePath.endsWith(".html")) {
-    return "text/html; charset=utf-8";
-  }
-
-  if (filePath.endsWith(".css")) {
-    return "text/css; charset=utf-8";
-  }
-
-  if (filePath.endsWith(".js")) {
-    return "application/javascript; charset=utf-8";
-  }
-
-  if (filePath.endsWith(".json")) {
-    return "application/json; charset=utf-8";
-  }
-
-  return "text/plain; charset=utf-8";
-}
-
-function decorateState(state) {
-  return {
-    note: state.note,
-    deck: state.deck,
-    lastSavedAt: state.lastSavedAt,
-    lastSummary: state.lastSummary,
-    stats: {
-      totalCards: state.deck.length,
-    },
-  };
-}
-
-function sendJson(response, statusCode, payload) {
-  response.writeHead(statusCode, {
-    "Content-Type": "application/json; charset=utf-8",
-    "Cache-Control": "no-store",
-  });
-  response.end(JSON.stringify(payload));
-}
-
-function readJsonBody(request) {
   return new Promise((resolve, reject) => {
     let raw = "";
 
     request.on("data", (chunk) => {
       raw += chunk;
-
       if (raw.length > 1_000_000) {
         reject(httpError(413, "Request body too large."));
-        request.destroy();
       }
     });
 
@@ -213,8 +82,6 @@ async function rewriteSpanishDraft(text, apiKey) {
     );
   }
 
-  console.warn("Groq strict schema failed validation; falling back to JSON object mode.");
-
   const fallbackAttempt = await requestGroqChat(apiKey, buildFallbackRewritePayload(text));
 
   if (!fallbackAttempt.ok) {
@@ -226,14 +93,6 @@ async function rewriteSpanishDraft(text, apiKey) {
 
   const parsed = normalizeRewritePayload(parseGroqJsonContent(fallbackAttempt.result), text);
   return finalizeRewritePayload(parsed);
-}
-
-async function safeReadText(response) {
-  try {
-    return await response.text();
-  } catch {
-    return "";
-  }
 }
 
 function buildStrictRewritePayload(text) {
@@ -249,29 +108,17 @@ function buildStrictRewritePayload(text) {
         schema: {
           type: "object",
           properties: {
-            correctedText: {
-              type: "string",
-            },
-            changeSummary: {
-              type: "string",
-            },
+            correctedText: { type: "string" },
+            changeSummary: { type: "string" },
             cards: {
               type: "array",
               items: {
                 type: "object",
                 properties: {
-                  sourceTerm: {
-                    type: "string",
-                  },
-                  spanishTerm: {
-                    type: "string",
-                  },
-                  exampleSentence: {
-                    type: "string",
-                  },
-                  notes: {
-                    type: "string",
-                  },
+                  sourceTerm: { type: "string" },
+                  spanishTerm: { type: "string" },
+                  exampleSentence: { type: "string" },
+                  notes: { type: "string" },
                 },
                 required: ["sourceTerm", "spanishTerm", "exampleSentence", "notes"],
                 additionalProperties: false,
@@ -364,7 +211,7 @@ function normalizeRewritePayload(payload, originalText) {
 
   const correctedText = String(payload.correctedText || "").trim() || originalText;
   const changeSummary =
-    String(payload.changeSummary || "").trim() || "Se corrigió el texto y se registraron términos pendientes.";
+    String(payload.changeSummary || "").trim() || "Se corrigio el texto y se registraron terminos pendientes.";
   const rawCards = Array.isArray(payload.cards) ? payload.cards : [];
 
   const cards = rawCards
@@ -399,4 +246,12 @@ function finalizeRewritePayload(payload) {
 
 function isJsonValidationFailure(details) {
   return typeof details === "string" && details.includes("json_validate_failed");
+}
+
+async function safeReadText(response) {
+  try {
+    return await response.text();
+  } catch {
+    return "";
+  }
 }
