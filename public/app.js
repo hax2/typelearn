@@ -839,12 +839,20 @@ function syncLanguageMode() {
   const config = currentLanguageConfig();
   eyebrow.textContent = config.eyebrow;
   heroTitle.textContent = config.heroTitle;
-  subtitleDesktop.innerHTML = config.subtitleDesktop;
-  subtitleMobile.textContent = config.subtitleMobile;
+  subtitleDesktop.innerHTML = buildDesktopSubtitle(config.name);
+  subtitleMobile.textContent = buildMobileSubtitle(config.name);
   editor.placeholder = config.placeholder;
   deckEmpty.textContent = config.deckEmpty;
   languageHint.textContent = `Current target language: ${config.name}. You can switch any time without leaving the page.`;
   syncPracticeToggle();
+}
+
+function buildDesktopSubtitle(languageName) {
+  return `Write freely or answer a prompt. When you do not know a word or phrase, write it in English. Press <span class="keycap">Ctrl+S</span> or <span class="keycap">Cmd+S</span> to translate the English into ${languageName} and fix grammar and spelling mistakes.`;
+}
+
+function buildMobileSubtitle(languageName) {
+  return `Write freely or answer a prompt. When you do not know a word or phrase, write it in English. Press Check + Fix to translate the English into ${languageName} and fix grammar and spelling mistakes.`;
 }
 
 function promptCategories() {
