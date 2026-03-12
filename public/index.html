@@ -22,20 +22,23 @@
           <p class="status-label">Status</p>
           <p class="status-value" id="saveStatus">Loading your workspace...</p>
           <p class="status-meta" id="lastSaved">No saves yet</p>
-          <div class="status-controls">
-            <label class="status-field" for="groqApiKey">Groq API key (optional)</label>
-            <input
-              id="groqApiKey"
-              class="status-input"
-              type="password"
-              autocomplete="off"
-              placeholder="gsk_..."
-            />
-            <button id="saveKeyButton" class="ghost-button mini-button" type="button">Save key</button>
-            <p class="status-hint">
-              If empty, the app uses the server key. If set, this key is stored only in your browser.
-            </p>
-          </div>
+          <details class="advanced-panel">
+            <summary class="advanced-toggle">Advanced settings</summary>
+            <div class="status-controls">
+              <label class="status-field" for="groqApiKey">Groq API key (optional)</label>
+              <input
+                id="groqApiKey"
+                class="status-input"
+                type="password"
+                autocomplete="off"
+                placeholder="gsk_..."
+              />
+              <button id="saveKeyButton" class="ghost-button mini-button" type="button">Save key</button>
+              <p class="status-hint">
+                If empty, the app uses the server key. If set, this key is stored only in your browser.
+              </p>
+            </div>
+          </details>
           <div class="stats-row">
             <div>
               <span class="stat-label">Deck</span>
@@ -63,10 +66,15 @@
           </div>
           <div class="prompt-card">
             <div class="prompt-top">
-              <p class="prompt-label" id="promptLabel">Optional prompt</p>
+              <div class="prompt-heading">
+                <p class="prompt-label" id="promptLabel">Optional prompt</p>
+                <label class="status-field prompt-field" for="promptCategory">Prompt category</label>
+                <select id="promptCategory" class="status-input prompt-select"></select>
+              </div>
               <div class="prompt-actions">
                 <button id="nextPromptButton" class="ghost-button mini-button" type="button">New prompt</button>
                 <button id="insertPromptButton" class="ghost-button mini-button" type="button">Insert prompt</button>
+                <button id="speakPromptButton" class="ghost-button mini-button" type="button">Speak prompt</button>
               </div>
             </div>
             <p class="prompt-text" id="promptText"></p>

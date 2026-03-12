@@ -1,5 +1,6 @@
 const STORAGE_KEY = "typelearn.state.v4";
 const SETTINGS_KEY = "typelearn.settings.v1";
+
 const TARGET_LANGUAGES = {
   spanish: {
     name: "Spanish",
@@ -12,29 +13,169 @@ const TARGET_LANGUAGES = {
     cardHint: "Tap to reveal the Spanish answer.",
     cardLabel: "Spanish",
     deckEmpty: "Your missing English words will show up here as study cards after each save.",
-    promptLabel: "Optional prompt (Spanish)",
-    prompts: [
-      "Your friend from another country is visiting for 48 hours. Plan the full itinerary and explain your choices.",
-      "You can keep only three apps on your phone. Which ones stay and why?",
-      "Describe your most chaotic travel day from start to finish.",
-      "Would you rather live in a huge city or a small town for the next ten years? Defend your choice.",
-      "Write a message to your past self from five years ago.",
-      "A restaurant gave you the wrong order and you are in a rush. Describe what happened and what you did.",
-      "Tell the story of a small decision that changed your day.",
-      "Describe your dream apartment in detail, including location, layout, and neighborhood.",
-      "Write about a skill everyone should learn before age 18.",
-      "You have one free weekend with no obligations and no internet. What do you do?",
-      "Should schools teach practical life skills like taxes and contracts? Explain your position.",
-      "Describe a conversation that made you rethink your opinion.",
-      "If you had to move to a new country next month, what would be your biggest fear and biggest excitement?",
-      "Write a short review of a movie or series you recently watched.",
-      "Explain your morning routine and what you want to improve.",
-      "Tell a story about getting lost in an unfamiliar place.",
-      "Describe a local food that visitors often misunderstand.",
-      "You are creating a playlist for a long night drive. What songs or moods go first, middle, and last?",
-      "Write about a habit that improved your mood or productivity.",
-      "Should remote work be permanent for most office jobs? Argue your side.",
-    ],
+    promptLabel: "Idea para escribir",
+    promptCategoryLabel: "Categoria",
+    noPrompt: "Todavia no hay ideas disponibles en este modo.",
+    promptButtonNew: "Otra idea",
+    promptButtonInsert: "Insertar idea",
+    promptButtonSpeak: "Escuchar idea",
+    promptButtonStop: "Parar audio",
+    starterIntro: "Empieza con esta frase y desarrollala con detalles:",
+    starterFollowup: "Sigue con:",
+    practiceModeIdle: "Modo practica",
+    practiceModeActive: "Mostrar respuestas al tocar",
+    prompts: {
+      opinion: {
+        label: "Opiniones",
+        entries: [
+          {
+            type: "prompt",
+            text: "Solo puedes quedarte con tres aplicaciones en tu telefono. Cuales eliges y por que?",
+          },
+          {
+            type: "prompt",
+            text: "Deberian las escuelas ensenar habilidades practicas como impuestos, contratos y presupuestos? Defiende tu postura.",
+          },
+          {
+            type: "prompt",
+            text: "Seria mejor vivir los proximos diez anos en una ciudad enorme o en un pueblo pequeno? Explica tu decision.",
+          },
+          {
+            type: "prompt",
+            text: "La mayoria de los trabajos de oficina deberian seguir siendo remotos? Argumenta tu respuesta.",
+          },
+          {
+            type: "prompt",
+            text: "Que habilidad deberia aprender todo el mundo antes de cumplir 18 anos?",
+          },
+        ],
+      },
+      stories: {
+        label: "Historias",
+        entries: [
+          {
+            type: "prompt",
+            text: "Cuenta la historia de una pequena decision que cambio por completo tu dia.",
+          },
+          {
+            type: "prompt",
+            text: "Describe el dia de viaje mas caotico que has vivido, desde el principio hasta el final.",
+          },
+          {
+            type: "prompt",
+            text: "Escribe sobre una conversacion que te hizo cambiar de opinion.",
+          },
+          {
+            type: "prompt",
+            text: "Perdiste el rumbo en un lugar desconocido. Que paso y como saliste de ahi?",
+          },
+          {
+            type: "prompt",
+            text: "En un restaurante te dieron el pedido equivocado y estabas con prisa. Explica que hiciste.",
+          },
+        ],
+      },
+      daily: {
+        label: "Vida diaria",
+        entries: [
+          {
+            type: "prompt",
+            text: "Describe tu rutina de la manana y lo que te gustaria mejorar.",
+          },
+          {
+            type: "prompt",
+            text: "Tienes un fin de semana libre, sin obligaciones y sin internet. Como lo aprovechas?",
+          },
+          {
+            type: "prompt",
+            text: "Haz una resena breve de una pelicula o serie que viste hace poco.",
+          },
+          {
+            type: "prompt",
+            text: "Describe una comida local que los visitantes suelen entender mal.",
+          },
+          {
+            type: "prompt",
+            text: "Escribe sobre un habito que mejoro tu humor o tu productividad.",
+          },
+        ],
+      },
+      scenario: {
+        label: "Escenarios",
+        entries: [
+          {
+            type: "prompt",
+            text: "Un amigo extranjero viene a visitarte durante 48 horas. Organiza el itinerario completo y explica tus elecciones.",
+          },
+          {
+            type: "prompt",
+            text: "Si tuvieras que mudarte a otro pais el mes que viene, cual seria tu mayor miedo y tu mayor ilusion?",
+          },
+          {
+            type: "prompt",
+            text: "Disena tu apartamento ideal con detalles sobre la ubicacion, la distribucion y el barrio.",
+          },
+          {
+            type: "prompt",
+            text: "Estas preparando una playlist para un viaje largo de noche. Que energia quieres al principio, en medio y al final?",
+          },
+          {
+            type: "prompt",
+            text: "Escribe un mensaje para tu version de hace cinco anos.",
+          },
+        ],
+      },
+      starters: {
+        label: "Frases para continuar",
+        entries: [
+          {
+            type: "starter",
+            lead: "Lo que mas me sorprendio de ese dia fue...",
+            cues: [
+              "Empieza con la situacion exacta.",
+              "Explica por que te sorprendio.",
+              "Cuenta lo que cambio despues.",
+            ],
+          },
+          {
+            type: "starter",
+            lead: "Nunca pense que diria esto, pero ahora creo que...",
+            cues: [
+              "Di que opinabas antes.",
+              "Explica que hizo cambiar tu postura.",
+              "Termina con un ejemplo concreto.",
+            ],
+          },
+          {
+            type: "starter",
+            lead: "Si manana tuviera que empezar de cero en otra ciudad, primero...",
+            cues: [
+              "Describe tu primera decision.",
+              "Cuenta que seria lo mas dificil.",
+              "Explica que te daria tranquilidad.",
+            ],
+          },
+          {
+            type: "starter",
+            lead: "La razon real por la que sigo volviendo a ese lugar es...",
+            cues: [
+              "Describe el lugar con detalles.",
+              "Explica la conexion emocional.",
+              "Anade una pequena historia personal.",
+            ],
+          },
+          {
+            type: "starter",
+            lead: "Lo que me hubiera gustado decir en ese momento era...",
+            cues: [
+              "Resume la escena.",
+              "Escribe lo que no dijiste.",
+              "Explica por que te quedaste callado o callada.",
+            ],
+          },
+        ],
+      },
+    },
   },
   polish: {
     name: "Polish",
@@ -47,29 +188,169 @@ const TARGET_LANGUAGES = {
     cardHint: "Tap to reveal the Polish answer.",
     cardLabel: "Polish",
     deckEmpty: "Missing English words will appear here as Polish study cards after each save.",
-    promptLabel: "Optional prompt (Polish)",
-    prompts: [
-      "Przyjaciel przyjezdza do ciebie na 2 dni. Zaplanuj mu caly pobyt i uzasadnij wybor miejsc.",
-      "Mozesz zostawic tylko trzy aplikacje w telefonie. Ktore wybierasz i dlaczego?",
-      "Opisz najbardziej chaotyczny dzien podrozy, jaki miales.",
-      "Wolisz mieszkac w duzym miescie czy w malym miasteczku przez nastepne 10 lat? Uzasadnij.",
-      "Napisz wiadomosc do siebie sprzed pieciu lat.",
-      "W restauracji dostajesz zle zamowienie i bardzo sie spieszysz. Co robisz?",
-      "Opisz mala decyzje, ktora zmienila twoj dzien.",
-      "Opisz swoje wymarzone mieszkanie: lokalizacje, uklad i okolice.",
-      "Jaka umiejetnosc kazdy powinien poznac przed 18 rokiem zycia?",
-      "Masz wolny weekend bez internetu. Jak go spedzasz?",
-      "Czy szkola powinna uczyc praktycznych rzeczy, jak podatki i umowy? Wyjasnij stanowisko.",
-      "Opisz rozmowe, po ktorej zmieniles zdanie na wazny temat.",
-      "Gdybys mial przeprowadzic sie do nowego kraju za miesiac, czego najbardziej bys sie bal, a co by cie cieszylo?",
-      "Napisz krotka recenzje filmu lub serialu, ktory ostatnio widziales.",
-      "Opisz swoja poranna rutyne i co chcesz w niej poprawic.",
-      "Opowiedz historie o tym, jak zgubiles sie w nieznanym miejscu.",
-      "Opisz lokalne danie, ktore turysci czesto zle rozumieja.",
-      "Tworzysz playliste na nocna jazde samochodem. Jaki klimat wybierasz na poczatek, srodek i koniec?",
-      "Napisz o nawyku, ktory poprawil twoj humor albo produktywnosc.",
-      "Czy praca zdalna powinna zostac na stale w wiekszosci prac biurowych? Uzasadnij odpowiedz.",
-    ],
+    promptLabel: "Optional prompt",
+    promptCategoryLabel: "Prompt category",
+    noPrompt: "No prompts available for this mode yet.",
+    promptButtonNew: "New prompt",
+    promptButtonInsert: "Insert prompt",
+    promptButtonSpeak: "Speak prompt",
+    promptButtonStop: "Stop audio",
+    starterIntro: "Start with this sentence and build it out with details:",
+    starterFollowup: "Keep going with:",
+    practiceModeIdle: "Practice mode",
+    practiceModeActive: "Show answers by tap",
+    prompts: {
+      opinion: {
+        label: "Opinions",
+        entries: [
+          {
+            type: "prompt",
+            text: "Mozesz zostawic tylko trzy aplikacje w telefonie. Ktore wybierasz i dlaczego?",
+          },
+          {
+            type: "prompt",
+            text: "Czy szkola powinna uczyc praktycznych rzeczy, jak podatki i umowy? Wyjasnij stanowisko.",
+          },
+          {
+            type: "prompt",
+            text: "Wolisz mieszkac w duzym miescie czy w malym miasteczku przez nastepne 10 lat? Uzasadnij.",
+          },
+          {
+            type: "prompt",
+            text: "Czy praca zdalna powinna zostac na stale w wiekszosci prac biurowych? Uzasadnij odpowiedz.",
+          },
+          {
+            type: "prompt",
+            text: "Jaka umiejetnosc kazdy powinien poznac przed 18 rokiem zycia?",
+          },
+        ],
+      },
+      stories: {
+        label: "Stories",
+        entries: [
+          {
+            type: "prompt",
+            text: "Opisz najbardziej chaotyczny dzien podrozy, jaki miales.",
+          },
+          {
+            type: "prompt",
+            text: "Opisz mala decyzje, ktora zmienila twoj dzien.",
+          },
+          {
+            type: "prompt",
+            text: "Opisz rozmowe, po ktorej zmieniles zdanie na wazny temat.",
+          },
+          {
+            type: "prompt",
+            text: "Opowiedz historie o tym, jak zgubiles sie w nieznanym miejscu.",
+          },
+          {
+            type: "prompt",
+            text: "W restauracji dostajesz zle zamowienie i bardzo sie spieszysz. Co robisz?",
+          },
+        ],
+      },
+      daily: {
+        label: "Daily life",
+        entries: [
+          {
+            type: "prompt",
+            text: "Opisz swoja poranna rutyne i co chcesz w niej poprawic.",
+          },
+          {
+            type: "prompt",
+            text: "Masz wolny weekend bez internetu. Jak go spedzasz?",
+          },
+          {
+            type: "prompt",
+            text: "Napisz krotka recenzje filmu lub serialu, ktory ostatnio widziales.",
+          },
+          {
+            type: "prompt",
+            text: "Opisz lokalne danie, ktore turysci czesto zle rozumieja.",
+          },
+          {
+            type: "prompt",
+            text: "Napisz o nawyku, ktory poprawil twoj humor albo produktywnosc.",
+          },
+        ],
+      },
+      scenario: {
+        label: "Scenarios",
+        entries: [
+          {
+            type: "prompt",
+            text: "Przyjaciel przyjezdza do ciebie na 2 dni. Zaplanuj mu caly pobyt i uzasadnij wybor miejsc.",
+          },
+          {
+            type: "prompt",
+            text: "Gdybys mial przeprowadzic sie do nowego kraju za miesiac, czego najbardziej bys sie bal, a co by cie cieszylo?",
+          },
+          {
+            type: "prompt",
+            text: "Opisz swoje wymarzone mieszkanie: lokalizacje, uklad i okolice.",
+          },
+          {
+            type: "prompt",
+            text: "Tworzysz playliste na nocna jazde samochodem. Jaki klimat wybierasz na poczatek, srodek i koniec?",
+          },
+          {
+            type: "prompt",
+            text: "Napisz wiadomosc do siebie sprzed pieciu lat.",
+          },
+        ],
+      },
+      starters: {
+        label: "Sentence starters",
+        entries: [
+          {
+            type: "starter",
+            lead: "Najbardziej zaskoczylo mnie wtedy to, ze...",
+            cues: [
+              "Opisz, co dokladnie sie stalo.",
+              "Wyjasnij, dlaczego bylo to nieoczekiwane.",
+              "Napisz, co zmienilo sie potem.",
+            ],
+          },
+          {
+            type: "starter",
+            lead: "Nigdy nie sadzilem, ze to powiem, ale teraz uwazam, ze...",
+            cues: [
+              "Wyjasnij, co myslales wczesniej.",
+              "Powiedz, co zmienilo twoje zdanie.",
+              "Dodaj konkretny przyklad.",
+            ],
+          },
+          {
+            type: "starter",
+            lead: "Gdybym jutro musial zaczac od zera w nowym miescie, najpierw...",
+            cues: [
+              "Opisz pierwszy krok.",
+              "Napisz, co byloby najtrudniejsze.",
+              "Wyjasnij, co daloby ci spokoj.",
+            ],
+          },
+          {
+            type: "starter",
+            lead: "Prawdziwy powod, dla ktorego wracam w to miejsce, jest taki, ze...",
+            cues: [
+              "Opisz to miejsce szczegolowo.",
+              "Wyjasnij emocjonalna wiez.",
+              "Dodaj krotka osobista historie.",
+            ],
+          },
+          {
+            type: "starter",
+            lead: "To, co naprawde chcialem wtedy powiedziec, to...",
+            cues: [
+              "Zarysuj scene.",
+              "Napisz, czego nie powiedziales lub nie powiedzialas.",
+              "Wyjasnij, dlaczego milczales lub milczalas.",
+            ],
+          },
+        ],
+      },
+    },
   },
 };
 
@@ -80,7 +361,8 @@ const DEFAULT_STATE = {
   lastSummary: "Press Ctrl+S to fix grammar and translate English terms.",
   lastNewCards: 0,
   practiceMode: false,
-  currentPromptIndex: 0,
+  promptCategory: "opinion",
+  currentPromptIndexByCategory: {},
 };
 
 const DEFAULT_SETTINGS = {
@@ -92,6 +374,7 @@ const state = {
   ...loadState(),
   settings: loadSettings(),
   saving: false,
+  speaking: false,
 };
 
 const editor = document.querySelector("#editor");
@@ -113,8 +396,10 @@ const heroTitle = document.querySelector("#heroTitle");
 const subtitle = document.querySelector("#subtitle");
 const promptLabel = document.querySelector("#promptLabel");
 const promptText = document.querySelector("#promptText");
+const promptCategorySelect = document.querySelector("#promptCategory");
 const nextPromptButton = document.querySelector("#nextPromptButton");
 const insertPromptButton = document.querySelector("#insertPromptButton");
+const speakPromptButton = document.querySelector("#speakPromptButton");
 
 bootstrap();
 
@@ -122,11 +407,13 @@ function bootstrap() {
   editor.value = state.note;
   groqApiKeyInput.value = state.settings.groqApiKey;
   syncLanguageMode();
-  ensurePromptIndexValid();
+  syncPromptCategoryOptions();
+  ensurePromptSelectionValid();
   syncPrompt();
   renderDeck();
   renderMeta();
   syncPracticeToggle();
+  syncSpeechButton();
 
   if (state.settings.groqApiKey) {
     setStatus("Ready. Using browser-stored API key.", false);
@@ -149,13 +436,16 @@ saveKeyButton.addEventListener("click", () => {
 });
 
 languageToggle.addEventListener("click", () => {
+  stopSpeaking();
   const current = currentLanguageConfig();
   state.settings.targetLanguage = current.name === "Spanish" ? "polish" : "spanish";
-  state.currentPromptIndex = 0;
+  state.promptCategory = firstPromptCategoryKey();
+  state.currentPromptIndexByCategory = {};
   persistSettings();
   persistState();
   syncLanguageMode();
-  ensurePromptIndexValid();
+  syncPromptCategoryOptions();
+  ensurePromptSelectionValid();
   syncPrompt();
   renderDeck();
 });
@@ -167,14 +457,23 @@ practiceToggle.addEventListener("click", () => {
   renderDeck();
 });
 
+promptCategorySelect.addEventListener("change", () => {
+  stopSpeaking();
+  state.promptCategory = promptCategorySelect.value;
+  ensurePromptSelectionValid();
+  persistState();
+  syncPrompt();
+});
+
 nextPromptButton.addEventListener("click", () => {
-  const prompts = currentLanguageConfig().prompts || [];
+  const prompts = currentPromptEntries();
 
   if (!prompts.length) {
     return;
   }
 
-  state.currentPromptIndex = nextPromptIndex(prompts.length, state.currentPromptIndex);
+  const currentIndex = currentPromptIndex();
+  state.currentPromptIndexByCategory[state.promptCategory] = nextPromptIndex(prompts.length, currentIndex);
   persistState();
   syncPrompt();
 });
@@ -186,20 +485,16 @@ insertPromptButton.addEventListener("click", () => {
     return;
   }
 
-  const currentValue = editor.value;
-  const selectionStart = editor.selectionStart ?? currentValue.length;
-  const selectionEnd = editor.selectionEnd ?? currentValue.length;
-  const prefix = currentValue.slice(0, selectionStart);
-  const suffix = currentValue.slice(selectionEnd);
-  const separatorBefore = prefix && !prefix.endsWith("\n") ? "\n\n" : "";
-  const separatorAfter = suffix && !suffix.startsWith("\n") ? "\n\n" : "";
-  const inserted = `${separatorBefore}${prompt}${separatorAfter}`;
-  editor.value = `${prefix}${inserted}${suffix}`;
-  editor.focus();
-  const caret = prefix.length + inserted.length;
-  editor.setSelectionRange(caret, caret);
-  state.note = editor.value;
-  persistState();
+  insertIntoEditor(prompt);
+});
+
+speakPromptButton.addEventListener("click", () => {
+  if (state.speaking) {
+    stopSpeaking();
+    return;
+  }
+
+  speakCurrentPrompt();
 });
 
 window.addEventListener("keydown", (event) => {
@@ -208,6 +503,18 @@ window.addEventListener("keydown", (event) => {
     void saveDraft();
   }
 });
+
+window.addEventListener("beforeunload", () => {
+  stopSpeaking();
+});
+
+if ("speechSynthesis" in window) {
+  window.speechSynthesis.addEventListener("voiceschanged", () => {
+    if (state.speaking) {
+      syncSpeechButton();
+    }
+  });
+}
 
 async function saveDraft() {
   if (state.saving) {
@@ -325,7 +632,9 @@ function renderDeck() {
 
 function syncPracticeToggle() {
   practiceToggle.setAttribute("aria-pressed", String(state.practiceMode));
-  practiceToggle.textContent = state.practiceMode ? "Show answers by tap" : "Practice mode";
+  practiceToggle.textContent = state.practiceMode
+    ? currentLanguageConfig().practiceModeActive
+    : currentLanguageConfig().practiceModeIdle;
 }
 
 function persistState() {
@@ -338,7 +647,8 @@ function persistState() {
       lastSummary: state.lastSummary,
       lastNewCards: state.lastNewCards,
       practiceMode: state.practiceMode,
-      currentPromptIndex: state.currentPromptIndex,
+      promptCategory: state.promptCategory,
+      currentPromptIndexByCategory: state.currentPromptIndexByCategory,
     }),
   );
 }
@@ -353,7 +663,11 @@ function loadState() {
     lastSummary: typeof parsed.lastSummary === "string" ? parsed.lastSummary : DEFAULT_STATE.lastSummary,
     lastNewCards: Number.isFinite(parsed.lastNewCards) ? parsed.lastNewCards : DEFAULT_STATE.lastNewCards,
     practiceMode: Boolean(parsed.practiceMode),
-    currentPromptIndex: Number.isFinite(parsed.currentPromptIndex) ? parsed.currentPromptIndex : 0,
+    promptCategory: typeof parsed.promptCategory === "string" ? parsed.promptCategory : DEFAULT_STATE.promptCategory,
+    currentPromptIndexByCategory:
+      parsed.currentPromptIndexByCategory && typeof parsed.currentPromptIndexByCategory === "object"
+        ? parsed.currentPromptIndexByCategory
+        : {},
   };
 }
 
@@ -476,39 +790,105 @@ function syncLanguageMode() {
   subtitle.textContent = config.subtitle;
   editor.placeholder = config.placeholder;
   deckEmpty.textContent = config.deckEmpty;
+  syncPracticeToggle();
+}
+
+function syncPromptCategoryOptions() {
+  const categories = promptCategories();
+  const currentValue = state.promptCategory;
+  promptCategorySelect.innerHTML = "";
+
+  for (const [key, category] of categories) {
+    const option = document.createElement("option");
+    option.value = key;
+    option.textContent = category.label;
+    promptCategorySelect.appendChild(option);
+  }
+
+  const hasCurrent = categories.some(([key]) => key === currentValue);
+  state.promptCategory = hasCurrent ? currentValue : firstPromptCategoryKey();
+  promptCategorySelect.value = state.promptCategory;
 }
 
 function syncPrompt() {
   const config = currentLanguageConfig();
   const prompt = currentPromptText();
   promptLabel.textContent = config.promptLabel;
-  promptText.textContent = prompt || "No prompts available for this mode yet.";
+  promptText.textContent = prompt || config.noPrompt;
+  nextPromptButton.textContent = config.promptButtonNew;
+  insertPromptButton.textContent = config.promptButtonInsert;
+  promptCategorySelect.setAttribute("aria-label", config.promptCategoryLabel);
   const isDisabled = !prompt;
   nextPromptButton.disabled = isDisabled;
   insertPromptButton.disabled = isDisabled;
+  syncSpeechButton();
+}
+
+function promptCategories() {
+  return Object.entries(currentLanguageConfig().prompts || {});
+}
+
+function firstPromptCategoryKey() {
+  const categories = promptCategories();
+  return categories.length ? categories[0][0] : "";
+}
+
+function currentPromptEntries() {
+  const category = currentLanguageConfig().prompts?.[state.promptCategory];
+  return Array.isArray(category?.entries) ? category.entries : [];
+}
+
+function currentPromptIndex() {
+  const rawIndex = state.currentPromptIndexByCategory?.[state.promptCategory];
+  return Number.isInteger(rawIndex) ? rawIndex : 0;
+}
+
+function currentPromptEntry() {
+  const prompts = currentPromptEntries();
+
+  if (!prompts.length) {
+    return null;
+  }
+
+  ensurePromptSelectionValid();
+  return prompts[currentPromptIndex()] || null;
 }
 
 function currentPromptText() {
-  const prompts = currentLanguageConfig().prompts || [];
+  const entry = currentPromptEntry();
 
-  if (!prompts.length) {
+  if (!entry) {
     return "";
   }
 
-  ensurePromptIndexValid();
-  return prompts[state.currentPromptIndex];
+  if (entry.type === "starter") {
+    const config = currentLanguageConfig();
+    const cueLines = Array.isArray(entry.cues)
+      ? entry.cues.map((cue, index) => `${index + 1}. ${cue}`).join("\n")
+      : "";
+    return `${config.starterIntro}\n${entry.lead}\n\n${config.starterFollowup}\n${cueLines}`;
+  }
+
+  return String(entry.text || "").trim();
 }
 
-function ensurePromptIndexValid() {
-  const prompts = currentLanguageConfig().prompts || [];
+function ensurePromptSelectionValid() {
+  const categories = promptCategories();
+
+  if (!categories.some(([key]) => key === state.promptCategory)) {
+    state.promptCategory = firstPromptCategoryKey();
+  }
+
+  const prompts = currentPromptEntries();
 
   if (!prompts.length) {
-    state.currentPromptIndex = 0;
+    state.currentPromptIndexByCategory[state.promptCategory] = 0;
     return;
   }
 
-  if (!Number.isInteger(state.currentPromptIndex) || state.currentPromptIndex < 0 || state.currentPromptIndex >= prompts.length) {
-    state.currentPromptIndex = 0;
+  const currentIndex = currentPromptIndex();
+  if (currentIndex < 0 || currentIndex >= prompts.length) {
+    state.currentPromptIndexByCategory[state.promptCategory] = 0;
   }
 }
 
@@ -524,4 +904,99 @@ function nextPromptIndex(total, current) {
   }
 
   return index;
+}
+
+function insertIntoEditor(text) {
+  const currentValue = editor.value;
+  const selectionStart = editor.selectionStart ?? currentValue.length;
+  const selectionEnd = editor.selectionEnd ?? currentValue.length;
+  const prefix = currentValue.slice(0, selectionStart);
+  const suffix = currentValue.slice(selectionEnd);
+  const separatorBefore = prefix && !prefix.endsWith("\n") ? "\n\n" : "";
+  const separatorAfter = suffix && !suffix.startsWith("\n") ? "\n\n" : "";
+  const inserted = `${separatorBefore}${text}${separatorAfter}`;
+  editor.value = `${prefix}${inserted}${suffix}`;
+  editor.focus();
+  const caret = prefix.length + inserted.length;
+  editor.setSelectionRange(caret, caret);
+  state.note = editor.value;
+  persistState();
+}
+
+function speakCurrentPrompt() {
+  const prompt = currentPromptText();
+
+  if (!prompt) {
+    return;
+  }
+
+  if (!("speechSynthesis" in window) || typeof window.SpeechSynthesisUtterance !== "function") {
+    setStatus("Browser TTS is not available in this browser.", true);
+    return;
+  }
+
+  stopSpeaking(false);
+
+  const utterance = new SpeechSynthesisUtterance(prompt);
+  utterance.lang = currentLanguageVoiceCode();
+  utterance.rate = 0.96;
+  utterance.pitch = 1;
+
+  const voice = pickVoice(utterance.lang);
+  if (voice) {
+    utterance.voice = voice;
+  }
+
+  utterance.onstart = () => {
+    state.speaking = true;
+    syncSpeechButton();
+  };
+
+  utterance.onend = () => {
+    state.speaking = false;
+    syncSpeechButton();
+  };
+
+  utterance.onerror = () => {
+    state.speaking = false;
+    syncSpeechButton();
+    setStatus("Browser TTS could not play this prompt.", true);
+  };
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utterance);
+}
+
+function stopSpeaking(updateButton = true) {
+  if (!("speechSynthesis" in window)) {
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+  state.speaking = false;
+
+  if (updateButton) {
+    syncSpeechButton();
+  }
+}
+
+function syncSpeechButton() {
+  const config = currentLanguageConfig();
+  const prompt = currentPromptText();
+  const supported = "speechSynthesis" in window && typeof window.SpeechSynthesisUtterance === "function";
+  speakPromptButton.disabled = !prompt || !supported;
+  speakPromptButton.textContent = state.speaking ? config.promptButtonStop || "Stop audio" : config.promptButtonSpeak;
+}
+
+function currentLanguageVoiceCode() {
+  return state.settings.targetLanguage === "polish" ? "pl-PL" : "es-ES";
+}
+
+function pickVoice(languageCode) {
+  if (!("speechSynthesis" in window)) {
+    return null;
+  }
+
+  const voices = window.speechSynthesis.getVoices();
+  return voices.find((voice) => voice.lang === languageCode) || voices.find((voice) => voice.lang.startsWith(languageCode.slice(0, 2))) || null;
 }

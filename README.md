@@ -10,7 +10,7 @@ You write mostly in Spanish. If you get stuck, drop in the English word or phras
 - adds those terms to a flashcard deck
 
 The editor also has a mode switch (`Mode: Spanish` / `Mode: Polish`) so you can practice either language.
-It also includes optional hardcoded writing prompts you can rotate and insert into the draft.
+It includes categorized writing prompts, sentence-starter prompts, and optional browser text-to-speech for the current prompt.
 
 ## Local run
 
@@ -26,7 +26,7 @@ npm start
 You can either:
 
 - set `GROQ_API_KEY` in `.env` and leave the UI key field empty
-- paste your key into the UI key field (stored in your browser only)
+- paste your key into the Advanced settings panel in the UI (stored in your browser only)
 
 The note and flashcards are stored in browser `localStorage`.
 
@@ -40,5 +40,5 @@ The note and flashcards are stored in browser `localStorage`.
 After deploy:
 
 - open your Vercel URL
-- if no server key is configured, paste your Groq key in `Groq API key` and click `Save key`
+- if no server key is configured, open `Advanced settings`, paste your Groq key in `Groq API key`, and click `Save key`
 - write text and press `Ctrl+S`

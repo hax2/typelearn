@@ -139,9 +139,38 @@ body::before {
 .status-controls {
   margin-top: 16px;
   padding-top: 14px;
-  border-top: 1px solid rgba(95, 73, 52, 0.12);
   display: grid;
   gap: 8px;
+}
+
+.advanced-panel {
+  margin-top: 16px;
+  border-top: 1px solid rgba(95, 73, 52, 0.12);
+  padding-top: 14px;
+}
+
+.advanced-toggle {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.advanced-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.advanced-toggle::before {
+  content: "+";
+  display: inline-block;
+  margin-right: 0.45rem;
+  font-weight: 700;
+}
+
+.advanced-panel[open] .advanced-toggle::before {
+  content: "-";
 }
 
 .status-field {
@@ -231,16 +260,23 @@ body::before {
 
 .prompt-top {
   display: flex;
-  align-items: center;
+  align-items: start;
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.prompt-heading {
+  display: grid;
+  gap: 8px;
+  min-width: min(100%, 280px);
 }
 
 .prompt-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: start;
 }
 
 .prompt-label {
@@ -249,6 +285,14 @@ body::before {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+.prompt-field {
+  margin-top: 2px;
+}
+
+.prompt-select {
+  min-width: 240px;
 }
 
 .prompt-text {
