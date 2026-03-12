@@ -10,12 +10,28 @@
     <div class="backdrop"></div>
     <div class="shell">
       <header class="hero">
+        <div class="hero-topbar">
+          <div class="language-bar">
+            <label class="panel-field" for="languageSelect">Choose writing language</label>
+            <select id="languageSelect" class="panel-select"></select>
+          </div>
+          <p class="panel-hint language-bar-hint" id="languageHint">
+            Switch between Spanish, Polish, Russian, and Ukrainian at any time.
+          </p>
+        </div>
         <div class="hero-copy">
           <p class="eyebrow" id="eyebrow">Spanish writing lab</p>
           <h1 id="heroTitle">Write in Spanish. Borrow from English only when you have to.</h1>
-          <p class="subtitle" id="subtitle">
-            Choose a language, write freely, then use Check + Fix to clean the draft, translate English gaps, and
-            turn those missing words into flashcards.
+          <p class="subtitle">
+            <span class="desktop-copy" id="subtitleDesktop">
+              Choose a language, write freely, then press <span class="keycap">Ctrl+S</span> or
+              <span class="keycap">Cmd+S</span> to check and fix the draft, translate English gaps, and turn missing
+              words into flashcards.
+            </span>
+            <span class="mobile-copy" id="subtitleMobile">
+              Choose a language, write freely, then use Check + Fix to clean the draft, translate English gaps, and
+              turn missing words into flashcards.
+            </span>
           </p>
         </div>
       </header>
@@ -26,11 +42,6 @@
             <div class="panel-heading">
               <p class="panel-kicker">Editor</p>
               <h2>Draft</h2>
-              <label class="panel-field" for="languageSelect">Choose writing language</label>
-              <select id="languageSelect" class="panel-select"></select>
-              <p class="panel-hint" id="languageHint">
-                Switch between Spanish, Polish, Russian, and Ukrainian at any time.
-              </p>
               <details class="advanced-panel">
                 <summary class="advanced-toggle">Advanced settings</summary>
                 <div class="advanced-controls">
@@ -50,6 +61,7 @@
               </details>
             </div>
             <div class="button-row">
+              <button id="speakDraftButton" class="ghost-button" type="button">Read draft</button>
               <button id="saveButton" class="accent-button" type="button">Check + Fix</button>
             </div>
           </div>
@@ -61,7 +73,7 @@
           <div class="panel-footer">
             <p id="changeSummary">Corrections and translations will appear after each save.</p>
           </div>
-          <details class="prompt-panel">
+          <details class="prompt-panel" id="promptPanel" open>
             <summary class="prompt-summary">Need a prompt?</summary>
             <div class="prompt-card">
               <div class="prompt-top">

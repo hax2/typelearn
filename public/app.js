@@ -10,8 +10,10 @@ const TARGET_LANGUAGES = {
     voiceCode: "es-ES",
     eyebrow: "Spanish writing lab",
     heroTitle: "Write in Spanish. Borrow from English only when you have to.",
-    subtitle:
-      "Choose Spanish, write freely, then use Check + Fix to clean the draft, translate English gaps, and turn those missing words into flashcards.",
+    subtitleDesktop:
+      "Choose Spanish, write freely, then press <span class=\"keycap\">Ctrl+S</span> or <span class=\"keycap\">Cmd+S</span> to check and fix the draft, translate English gaps, and turn missing words into flashcards.",
+    subtitleMobile:
+      "Choose Spanish, write freely, then use Check + Fix to clean the draft, translate English gaps, and turn missing words into flashcards.",
     placeholder: "Escribe aqui. Si no sabes una palabra, ponla en English y pulsa Check + Fix.",
     cardHint: "Tap to reveal the Spanish answer.",
     cardLabel: "Spanish",
@@ -107,8 +109,10 @@ const TARGET_LANGUAGES = {
     voiceCode: "pl-PL",
     eyebrow: "Polish writing lab",
     heroTitle: "Write in Polish. Borrow from English only when you have to.",
-    subtitle:
-      "Choose Polish, write freely, then use Check + Fix to clean the draft, translate English gaps, and turn those missing words into flashcards.",
+    subtitleDesktop:
+      "Choose Polish, write freely, then press <span class=\"keycap\">Ctrl+S</span> or <span class=\"keycap\">Cmd+S</span> to check and fix the draft, translate English gaps, and turn missing words into flashcards.",
+    subtitleMobile:
+      "Choose Polish, write freely, then use Check + Fix to clean the draft, translate English gaps, and turn missing words into flashcards.",
     placeholder: "Pisz po polsku. Jesli nie znasz slowa, wpisz je in English i nacisnij Check + Fix.",
     cardHint: "Tap to reveal the Polish answer.",
     cardLabel: "Polish",
@@ -204,8 +208,10 @@ const TARGET_LANGUAGES = {
     voiceCode: "ru-RU",
     eyebrow: "Russian writing lab",
     heroTitle: "Write in Russian. Borrow from English only when you have to.",
-    subtitle:
-      "Choose Russian, write freely, then use Check + Fix to clean the draft, translate English gaps, and turn those missing words into flashcards.",
+    subtitleDesktop:
+      "Choose Russian, write freely, then press <span class=\"keycap\">Ctrl+S</span> or <span class=\"keycap\">Cmd+S</span> to check and fix the draft, translate English gaps, and turn missing words into flashcards.",
+    subtitleMobile:
+      "Choose Russian, write freely, then use Check + Fix to clean the draft, translate English gaps, and turn missing words into flashcards.",
     placeholder: "Пиши по-русски. Если не знаешь слово, вставь его in English и нажми Check + Fix.",
     cardHint: "Tap to reveal the Russian answer.",
     cardLabel: "Russian",
@@ -301,8 +307,10 @@ const TARGET_LANGUAGES = {
     voiceCode: "uk-UA",
     eyebrow: "Ukrainian writing lab",
     heroTitle: "Write in Ukrainian. Borrow from English only when you have to.",
-    subtitle:
-      "Choose Ukrainian, write freely, then use Check + Fix to clean the draft, translate English gaps, and turn those missing words into flashcards.",
+    subtitleDesktop:
+      "Choose Ukrainian, write freely, then press <span class=\"keycap\">Ctrl+S</span> or <span class=\"keycap\">Cmd+S</span> to check and fix the draft, translate English gaps, and turn missing words into flashcards.",
+    subtitleMobile:
+      "Choose Ukrainian, write freely, then use Check + Fix to clean the draft, translate English gaps, and turn missing words into flashcards.",
     placeholder: "Пиши українською. Якщо не знаєш слова, встав його in English і натисни Check + Fix.",
     cardHint: "Tap to reveal the Ukrainian answer.",
     cardLabel: "Ukrainian",
@@ -414,6 +422,7 @@ const state = {
   settings: loadSettings(),
   saving: false,
   speaking: false,
+  speechTarget: "prompt",
 };
 
 const editor = document.querySelector("#editor");
@@ -425,17 +434,20 @@ const practiceToggle = document.querySelector("#practiceToggle");
 const cardTemplate = document.querySelector("#cardTemplate");
 const groqApiKeyInput = document.querySelector("#groqApiKey");
 const saveKeyButton = document.querySelector("#saveKeyButton");
+const speakDraftButton = document.querySelector("#speakDraftButton");
 const languageSelect = document.querySelector("#languageSelect");
 const languageHint = document.querySelector("#languageHint");
 const eyebrow = document.querySelector("#eyebrow");
 const heroTitle = document.querySelector("#heroTitle");
-const subtitle = document.querySelector("#subtitle");
+const subtitleDesktop = document.querySelector("#subtitleDesktop");
+const subtitleMobile = document.querySelector("#subtitleMobile");
 const promptLabel = document.querySelector("#promptLabel");
 const promptText = document.querySelector("#promptText");
 const promptCategorySelect = document.querySelector("#promptCategory");
 const nextPromptButton = document.querySelector("#nextPromptButton");
 const insertPromptButton = document.querySelector("#insertPromptButton");
 const speakPromptButton = document.querySelector("#speakPromptButton");
+const promptPanel = document.querySelector("#promptPanel");
 
 bootstrap();
 
@@ -446,6 +458,7 @@ function bootstrap() {
   syncLanguageMode();
   syncPromptCategoryOptions();
   ensurePromptSelectionValid();
+  syncPromptPanelForViewport();
   syncPrompt();
   renderDeck();
   renderMeta();
@@ -453,9 +466,14 @@ function bootstrap() {
   syncSpeechButton();
 }
 
+window.addEventListener("resize", () => {
+  syncPromptPanelForViewport();
+});
+
 editor.addEventListener("input", () => {
   state.note = editor.value;
   persistState();
+  syncSpeechButton();
 });
 
 saveButton.addEventListener("click", () => {
@@ -519,12 +537,21 @@ insertPromptButton.addEventListener("click", () => {
 });
 
 speakPromptButton.addEventListener("click", () => {
-  if (state.speaking) {
+  if (state.speaking && state.speechTarget === "prompt") {
     stopSpeaking();
     return;
   }
 
-  speakCurrentPrompt();
+  speakText(currentPromptText(), "prompt");
+});
+
+speakDraftButton.addEventListener("click", () => {
+  if (state.speaking && state.speechTarget === "draft") {
+    stopSpeaking();
+    return;
+  }
+
+  speakText(editor.value.trim(), "draft");
 });
 
 window.addEventListener("keydown", (event) => {
@@ -812,7 +839,8 @@ function syncLanguageMode() {
   const config = currentLanguageConfig();
   eyebrow.textContent = config.eyebrow;
   heroTitle.textContent = config.heroTitle;
-  subtitle.textContent = config.subtitle;
+  subtitleDesktop.innerHTML = config.subtitleDesktop;
+  subtitleMobile.textContent = config.subtitleMobile;
   editor.placeholder = config.placeholder;
   deckEmpty.textContent = config.deckEmpty;
   languageHint.textContent = `Current target language: ${config.name}. You can switch any time without leaving the page.`;
@@ -916,6 +944,19 @@ function syncPrompt() {
   syncSpeechButton();
 }
 
+function syncPromptPanelForViewport() {
+  if (!promptPanel) {
+    return;
+  }
+
+  if (window.matchMedia("(max-width: 640px)").matches) {
+    promptPanel.open = false;
+    return;
+  }
+
+  promptPanel.open = true;
+}
+
 function nextPromptIndex(total, current) {
   if (total <= 1) {
     return 0;
@@ -945,10 +986,10 @@ function insertIntoEditor(text) {
   persistState();
 }
 
-function speakCurrentPrompt() {
-  const prompt = currentPromptText();
+function speakText(text, target) {
+  const content = String(text || "").trim();
 
-  if (!prompt) {
+  if (!content) {
     return;
   }
 
@@ -959,7 +1000,7 @@ function speakCurrentPrompt() {
 
   stopSpeaking(false);
 
-  const utterance = new SpeechSynthesisUtterance(prompt);
+  const utterance = new SpeechSynthesisUtterance(content);
   utterance.lang = currentLanguageConfig().voiceCode;
   utterance.rate = 0.96;
   utterance.pitch = 1;
@@ -971,18 +1012,21 @@ function speakCurrentPrompt() {
 
   utterance.onstart = () => {
     state.speaking = true;
+    state.speechTarget = target;
     syncSpeechButton();
   };
 
   utterance.onend = () => {
     state.speaking = false;
+    state.speechTarget = "prompt";
     syncSpeechButton();
   };
 
   utterance.onerror = () => {
     state.speaking = false;
+    state.speechTarget = "prompt";
     syncSpeechButton();
-    updateSummary("Browser TTS could not play this prompt.", true);
+    updateSummary("Browser TTS could not play this audio.", true);
   };
 
   window.speechSynthesis.cancel();
@@ -996,6 +1040,7 @@ function stopSpeaking(updateButton = true) {
 
   window.speechSynthesis.cancel();
   state.speaking = false;
+  state.speechTarget = "prompt";
 
   if (updateButton) {
     syncSpeechButton();
@@ -1005,9 +1050,14 @@ function stopSpeaking(updateButton = true) {
 function syncSpeechButton() {
   const config = currentLanguageConfig();
   const prompt = currentPromptText();
+  const draft = editor.value.trim();
   const supported = "speechSynthesis" in window && typeof window.SpeechSynthesisUtterance === "function";
   speakPromptButton.disabled = !prompt || !supported;
-  speakPromptButton.textContent = state.speaking ? config.promptButtonStop : config.promptButtonSpeak;
+  speakDraftButton.disabled = !draft || !supported;
+  speakPromptButton.textContent =
+    state.speaking && state.speechTarget === "prompt" ? config.promptButtonStop : config.promptButtonSpeak;
+  speakDraftButton.textContent =
+    state.speaking && state.speechTarget === "draft" ? "Stop audio" : "Read draft";
 }
 
 function pickVoice(languageCode) {
