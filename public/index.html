@@ -11,73 +11,47 @@
     <div class="shell">
       <header class="hero">
         <div class="hero-copy">
-          <p class="eyebrow" id="eyebrow">Spanish-first writing lab</p>
+          <p class="eyebrow" id="eyebrow">Spanish writing lab</p>
           <h1 id="heroTitle">Write in Spanish. Borrow from English only when you have to.</h1>
           <p class="subtitle" id="subtitle">
-            Press <span class="keycap">Ctrl+S</span> or <span class="keycap">Cmd+S</span> to clean the draft,
-            translate English gaps into Spanish, and turn those missing words into flashcards.
+            Choose a language, write freely, then use Check + Fix to clean the draft, translate English gaps, and
+            turn those missing words into flashcards.
           </p>
         </div>
-        <aside class="status-card">
-          <p class="status-label">Status</p>
-          <p class="status-value" id="saveStatus">Loading your workspace...</p>
-          <p class="status-meta" id="lastSaved">No saves yet</p>
-          <details class="advanced-panel">
-            <summary class="advanced-toggle">Advanced settings</summary>
-            <div class="status-controls">
-              <label class="status-field" for="groqApiKey">Groq API key (optional)</label>
-              <input
-                id="groqApiKey"
-                class="status-input"
-                type="password"
-                autocomplete="off"
-                placeholder="gsk_..."
-              />
-              <button id="saveKeyButton" class="ghost-button mini-button" type="button">Save key</button>
-              <p class="status-hint">
-                If empty, the app uses the server key. If set, this key is stored only in your browser.
-              </p>
-            </div>
-          </details>
-          <div class="stats-row">
-            <div>
-              <span class="stat-label">Deck</span>
-              <strong class="stat-value" id="cardCount">0 cards</strong>
-            </div>
-            <div>
-              <span class="stat-label">Last pass</span>
-              <strong class="stat-value" id="newCardsCount">0 new</strong>
-            </div>
-          </div>
-        </aside>
       </header>
 
       <main class="grid">
         <section class="panel editor-panel">
           <div class="panel-header">
-            <div>
+            <div class="panel-heading">
               <p class="panel-kicker">Editor</p>
               <h2>Draft</h2>
+              <label class="panel-field" for="languageSelect">Choose writing language</label>
+              <select id="languageSelect" class="panel-select"></select>
+              <p class="panel-hint" id="languageHint">
+                Switch between Spanish, Polish, Russian, and Ukrainian at any time.
+              </p>
+              <details class="advanced-panel">
+                <summary class="advanced-toggle">Advanced settings</summary>
+                <div class="advanced-controls">
+                  <label class="status-field" for="groqApiKey">Groq API key (optional)</label>
+                  <input
+                    id="groqApiKey"
+                    class="status-input"
+                    type="password"
+                    autocomplete="off"
+                    placeholder="gsk_..."
+                  />
+                  <button id="saveKeyButton" class="ghost-button mini-button" type="button">Save key</button>
+                  <p class="status-hint">
+                    If empty, the app uses the server key. If set, this key is stored only in your browser.
+                  </p>
+                </div>
+              </details>
             </div>
             <div class="button-row">
-              <button id="languageToggle" class="ghost-button" type="button">Mode: Spanish</button>
-              <button id="saveButton" class="accent-button" type="button">Fix + Save</button>
+              <button id="saveButton" class="accent-button" type="button">Check + Fix</button>
             </div>
-          </div>
-          <div class="prompt-card">
-            <div class="prompt-top">
-              <div class="prompt-heading">
-                <p class="prompt-label" id="promptLabel">Optional prompt</p>
-                <label class="status-field prompt-field" for="promptCategory">Prompt category</label>
-                <select id="promptCategory" class="status-input prompt-select"></select>
-              </div>
-              <div class="prompt-actions">
-                <button id="nextPromptButton" class="ghost-button mini-button" type="button">New prompt</button>
-                <button id="insertPromptButton" class="ghost-button mini-button" type="button">Insert prompt</button>
-                <button id="speakPromptButton" class="ghost-button mini-button" type="button">Speak prompt</button>
-              </div>
-            </div>
-            <p class="prompt-text" id="promptText"></p>
           </div>
           <textarea
             id="editor"
@@ -87,6 +61,24 @@
           <div class="panel-footer">
             <p id="changeSummary">Corrections and translations will appear after each save.</p>
           </div>
+          <details class="prompt-panel">
+            <summary class="prompt-summary">Need a prompt?</summary>
+            <div class="prompt-card">
+              <div class="prompt-top">
+                <div class="prompt-heading">
+                  <p class="prompt-label" id="promptLabel">Optional prompt</p>
+                  <label class="status-field prompt-field" for="promptCategory">Prompt category</label>
+                  <select id="promptCategory" class="status-input prompt-select"></select>
+                </div>
+                <div class="prompt-actions">
+                  <button id="nextPromptButton" class="ghost-button mini-button" type="button">New prompt</button>
+                  <button id="insertPromptButton" class="ghost-button mini-button" type="button">Insert prompt</button>
+                  <button id="speakPromptButton" class="ghost-button mini-button" type="button">Speak prompt</button>
+                </div>
+              </div>
+              <p class="prompt-text" id="promptText"></p>
+            </div>
+          </details>
         </section>
 
         <section class="panel deck-panel">

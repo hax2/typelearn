@@ -5,7 +5,7 @@ const DEFAULT_STATE = {
   note: "",
   deck: [],
   lastSavedAt: null,
-  lastSummary: "Pulsa Ctrl+S para corregir tu texto y guardar nuevas tarjetas.",
+  lastSummary: "Usa Check + Fix para corregir tu texto y guardar nuevas tarjetas.",
 };
 
 function normalizeCard(card) {

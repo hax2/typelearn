@@ -1,15 +1,15 @@
 # TypeLearn
 
-TypeLearn is a lightweight Spanish writing app for language learners.
+TypeLearn is a lightweight writing app for language learners.
 
-You write mostly in Spanish. If you get stuck, drop in the English word or phrase you do not know yet. When you press `Ctrl+S` or `Cmd+S`, the app:
+You write mostly in your target language. If you get stuck, drop in the English word or phrase you do not know yet. When you use `Check + Fix`, the app:
 
-- rewrites the draft into natural Spanish
+- rewrites the draft into natural target-language text
 - fixes grammar and awkward phrasing
 - extracts the English fallback terms you used
 - adds those terms to a flashcard deck
 
-The editor also has a mode switch (`Mode: Spanish` / `Mode: Polish`) so you can practice either language.
+The editor lets you switch between Spanish, Polish, Russian, and Ukrainian.
 It includes categorized writing prompts, sentence-starter prompts, and optional browser text-to-speech for the current prompt.
 
 ## Local run
@@ -41,4 +41,4 @@ After deploy:
 
 - open your Vercel URL
 - if no server key is configured, open `Advanced settings`, paste your Groq key in `Groq API key`, and click `Save key`
-- write text and press `Ctrl+S`
+- write text and click `Check + Fix`

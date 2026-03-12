@@ -153,7 +153,7 @@ function buildFallbackRewritePayload(text, targetLanguage) {
 }
 
 function buildRewriteMessages(text, targetLanguage) {
-  const languageLabel = targetLanguage === "polish" ? "Polish" : "Spanish";
+  const languageLabel = languageLabelFor(targetLanguage);
 
   return [
     {
@@ -252,7 +252,18 @@ function isJsonValidationFailure(details) {
 }
 
 function normalizeTargetLanguage(value) {
-  return value === "polish" ? "polish" : "spanish";
+  return ["spanish", "polish", "russian", "ukrainian"].includes(value) ? value : "spanish";
+}
+
+function languageLabelFor(targetLanguage) {
+  const labels = {
+    spanish: "Spanish",
+    polish: "Polish",
+    russian: "Russian",
+    ukrainian: "Ukrainian",
+  };
+
+  return labels[targetLanguage] || "Spanish";
 }
 
 async function safeReadText(response) {
